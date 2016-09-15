@@ -1,4 +1,1 @@
-# s3 info
-public info about s3
-
-*[redacted]*
+<h2><a href='http://yourhead.com/stacks'>Stacks 3</a></h2>
