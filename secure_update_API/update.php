@@ -24,7 +24,7 @@ class YHStacksUpdate {
 	// we'll retrieve it from the yourhead site, but it can be embedded on your server
 	// to improve speed 
 	public function key () {
-		$stackPublicKeyURL = "http://yourhead.com/appcast/RW6/Stacks3/stack_public_key.pem";
+		$stackPublicKeyURL = "https://raw.githubusercontent.com/yourhead/s3/master/secure_update_API/stack_public_key.pem";
 		$fp = fopen ($stackPublicKeyURL, "r");
 		//$fp = fopen ("stack_public_key.pem", "r");
 		if (!$fp) throw new Exception ("Could not retrieve the stack public key.");
