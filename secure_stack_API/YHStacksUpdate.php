@@ -10,21 +10,16 @@
  */
 class YHStacksUpdate {
 
-	// the filename of the localally cached copy of the stacks public key
-  	const STACKS_PUBLIC_KEY_FILENAME = "stack_public_key.pem";
+	public $stacksPublicKeyFilename;
+	public $developerPrivateKeyFilename;
+	public $developerPrivateKeyPassphrase;
 
-  	// the URL where the stacks public key can be downloaded
-	const STACKS_PUBLIC_KEY_URL = "http://yourhead.com/appcast/RW6/Stacks3/stack_public_key.pem";
-
-	// the filename of the developers private key
-	const DEVELOPER_PRIVATE_KEY_FILENAME = "Private.pem";
-
-	// the passphrase used to secure the developers private key
-	const DEVELOPER_PRIVATE_KEY_PASSPHRASE = "Stacks";
 
 
 
 
+  	// the URL where the stacks public key can be downloaded
+	const STACKS_PUBLIC_KEY_URL = "http://yourhead.com/appcast/RW6/Stacks3/stack_public_key.pem";
 
 	// the stack update request
 	private $stacksSignature;
@@ -40,12 +35,16 @@ class YHStacksUpdate {
 
 
 
-	public function __construct()
-	{
+	public function __construct() {
+
+		$this->stacksPublicKeyFilename = "stack_public_key.pem";
+		$this->developerPrivateKeyFilename = "Private.pem";
+		$this->developerPrivateKeyPassphrase = "";
+
 		$headers = apache_request_headers();
 		$headers = array_change_key_case($headers,CASE_LOWER);
 
-		if ($headers) $this->setStacksInfo($headers);
+		if ($headers) $this->setStacksInfo ($headers);
 		if ($this->stacksInfo) $this->setDeveloperInfo ($this->stacksInfo);
 	}
 
@@ -57,14 +56,12 @@ class YHStacksUpdate {
 	 * Verified data
 	 * Verify the signatures and return the data only if the signature is valid.
 	 */	
-	public function stacks_update_request ()
-	{
+	public function stacks_update_request () {
 		if (!$this->verify_stacks_update_request ()) return false;
 		return $this->stacksInfo;
 	}
 
-	public function devloper_update_info ()
-	{
+	public function devloper_update_info () {
 		if (!$this->verify_devloper_update_info ()) return false;
 		return $this->developerInfo;
 	}
@@ -78,16 +75,14 @@ class YHStacksUpdate {
 	 * To verify we compare the decrypted signature with the hashed data. If the hash
 	 * matches the decrypted signature the signature is valid and the data can be trusted.
 	 */
-	public function verify_stacks_update_request ()
-	{
+	public function verify_stacks_update_request () {
 		$hash = $this->public_decrypt ($this->stacksSignature, $this->stack_public_key ());
 		$digest = $this->digest ($this->stacksInfoJSON);
 		if ($hash !== $digest) throw new Exception("Invalid Stacks signature");
 		return true;
 	}
 
-	public function verify_devloper_update_info ()
-	{
+	public function verify_devloper_update_info () {
 		$hash = $this->private_decrypt ($this->developerSignature, $this->developer_private_key ());
 		$digest = $this->digest ($this->developerInfoJSON);
 		if ($hash !== $digest) throw new Exception("Invalid developer signature");
@@ -108,8 +103,8 @@ class YHStacksUpdate {
 	 * be used by the signature verification.
 	 */
 	private function setStacksInfo ($headers) {
-		$this->stacksSignature = $headers['signature'];
-		$this->stacksInfoJSON = $headers['stackupdateinfo'];
+		if (array_key_exists ('signature', $headers)) $this->stacksSignature = $headers['signature'];
+		if (array_key_exists ('stackupdateinfo', $headers)) $this->stacksInfoJSON = $headers['stackupdateinfo'];
 
 		if ($this->stacksInfoJSON) {
 			$this->stacksInfo = json_decode($this->stacksInfoJSON);
@@ -117,8 +112,8 @@ class YHStacksUpdate {
 	}
 
 	private function setDeveloperInfo ($stacksInfo) {
-		$this->developerSignature = $stacksInfo->DeveloperSignature;
-		$this->developerInfoJSON = $stacksInfo->DeveloperInfo;
+		if (property_exists ($stacksInfo, 'DeveloperSignature')) $this->developerSignature = $stacksInfo->DeveloperSignature;
+		if (property_exists ($stacksInfo, 'DeveloperInfo')) $this->developerInfoJSON = $stacksInfo->DeveloperInfo;
 
 		if ($this->developerInfoJSON) {
 			$this->developerInfo = json_decode($this->developerInfoJSON);
@@ -133,8 +128,7 @@ class YHStacksUpdate {
 	 * To verify the signatures we create an md5 hash of the JSON objects.
 	 * Each signature, once decrypted, should match its corresponding hash.
 	 */
-	private function digest($data)
-	{
+	private function digest($data) {
 		$digest = openssl_digest($data, "md5", true);
 		if (!$digest) throw new Exception("Could not create digest.");
 		return $digest;
@@ -150,10 +144,9 @@ class YHStacksUpdate {
 	 * github repository. The developer private key should be created with the generate_keys
 	 * ruby script. Your private key should not be shared with anyone else.
 	 */
-	private function stack_public_online_key()
-	{
+	private function stack_public_online_key() {
 		$ch = curl_init();
-		curl_setopt ($ch, CURLOPT_URL, $stackPublicKeyURL);
+		curl_setopt ($ch, CURLOPT_URL, self::STACKS_PUBLIC_KEY_URL);
 		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt ($ch, CURLOPT_HEADER, false);
 		curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 5);
@@ -163,26 +156,24 @@ class YHStacksUpdate {
 		return $httpCode !== 200 ? false : $results;
 	}
 
-	private function stack_public_key()
-	{
+	private function stack_public_key() {
 		$publicKey = false;
-		if (file_exists(self::STACKS_PUBLIC_KEY_FILENAME)) {
-			$publicKey = file_get_contents(self::STACKS_PUBLIC_KEY_FILENAME);
+		if (file_exists($this->stacksPublicKeyFilename)) {
+			$publicKey = file_get_contents($this->stacksPublicKeyFilename);
 		}
 		else {
 			$publicKey = $this->online_key();
-			if ($publicKey) file_put_contents(self::STACKS_PUBLIC_KEY_FILENAME, $publicKey);
+			if ($publicKey) file_put_contents($this->stacksPublicKeyFilename, $publicKey);
 		}
 
 		if (!$publicKey) throw new Exception ("Stacks public key could not be read.");
 		return $publicKey;
 	}
 
-	private function developer_private_key()
-	{
+	private function developer_private_key() {
 		$privateKey = false;
-		if (file_exists(self::DEVELOPER_PRIVATE_KEY_FILENAME)) {
-			$privateKey = openssl_get_privatekey('file://'.self::DEVELOPER_PRIVATE_KEY_FILENAME, self::DEVELOPER_PRIVATE_KEY_PASSPHRASE);
+		if (file_exists($this->developerPrivateKeyFilename)) {
+			$privateKey = openssl_get_privatekey('file://'.$this->developerPrivateKeyFilename, $this->developerPrivateKeyPassphrase);
 		}
 
 		if (!$privateKey) throw new Exception ("Developer private key could not be read.");
@@ -206,17 +197,13 @@ class YHStacksUpdate {
 	 * this signature with your private key and it should match an MD5 hash of the JSON
 	 * object.
 	 */
-	private function public_decrypt($data64, $key)
-	{
+	private function public_decrypt($data64, $key) {
 		$success = openssl_public_decrypt(base64_decode($data64), $decrypted, $key);
 		if (!$success) throw new Exception("Public decrypt: Bad signature");
 		return $decrypted;
 	}
 
-	// use the public key  to decrypt the signature.
-	// the result should be the same as the digest md5 hash
-	private function private_decrypt($data64, $key)
-	{
+	private function private_decrypt($data64, $key) {
 		$enc = base64_decode($data64);
 		$success = openssl_private_decrypt(base64_decode($data64), $decrypted, $key);
 

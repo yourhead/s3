@@ -64,12 +64,6 @@ The goals of the Secure Update API is to provide a flexible set of tools to ensu
 
 
 
-### Example php
-
-There is a complete example to securing updates provided. It validates both the request and the data before redirecting to the update.
-
-
-
 
 ## Ruby scripts
 
@@ -131,13 +125,25 @@ Public.pem
 }
 ```
 
-- updateSignature - This is the output of the signing script from above.
+- updateInfoSignature - This is the output of the signing script from above.
 ```
 ga2W5kXRdwLhBMMyekB/8Vb5KxYwcYt8kkzXYuBEXO37e1w/VRwCDWKrtPT1JNa0mXhVeVoKoimfJFXwheMIBS8hzfTxN5/YAgiBh6lcfPovG0joh4R5V5+cr7gTExp3tVCS/f7VoTghox+YVY3u4SZwLhJcHlluAYj+ZSaOB/InNwiuW05nKgJZeQ9achJ1cz/CmeGEdmhr8weMqkRbu+8n/TN4m2Q/V3DUZznkdIfTz0eEU+sjs0+DPyoB2H+M8gKba7bdfhjnNVLcgvZ1NEZpvg7L8RqlT0HaKTxO9rPXZLYGi7GbnP178RJ6E6Ifvso5EKldzrUJASKyM7ajkw==
 
 ```
 
 
+
+
+
+### Example php
+
+There is a complete example to securing appcasts provided. This php will validate requests before sending out the appcast. To use this php you should:
+
+ - Copy the `appcast.php`, `YHStacksUpdate.php`, an the `stack_public_key.pem` files to your update server.
+ - Set the `SUFeedURL` of your stack to the URL of the `appcast.php` file on your update server.
+ - Follow the examples above to generate keys and copy the `Private.pem` key file to your server.
+ - Follow the examples above to sign your update info and incorporate the signed info into your `Info.plist` of your stack.
+ - Open the `appcast.php` file with a text editor and customize the first few constants to fit your stack and server info.
 
 
 
