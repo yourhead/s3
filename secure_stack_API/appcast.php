@@ -46,48 +46,48 @@
     try {
 
 
-    	/*
-    	 * Get the Stacks version info
-    	 */
-    	if (!array_key_exists ('HTTP_USER_AGENT' , $_SERVER)) throw new Exception("Bad User Agent");
-    	$userAgent = $_SERVER['HTTP_USER_AGENT'];
-    	
-    	if (empty($userAgent)) throw new Exception("Empty User Agent");
+        /*
+         * Get the Stacks version info
+         */
+        if (!array_key_exists ('HTTP_USER_AGENT' , $_SERVER)) throw new Exception("Bad User Agent");
+        $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        
+        if (empty($userAgent)) throw new Exception("Empty User Agent");
         if (!strpos($userAgent, 'Sparkle')) throw new Exception("Not a Sparkle update");
 
-    	$exploded = explode("/", $userAgent);
-    	$stacksBuildString = end ($exploded);
-    	$stacksBuild = intval ($stacksBuildString);
+        $exploded = explode("/", $userAgent);
+        $stacksBuildString = end ($exploded);
+        $stacksBuild = intval ($stacksBuildString);
     
 
     
     
-    	/*
-    	 * Validate the signatures
-    	 */
-    	if ($stacksBuild >= SECURE_STACK_VERSION) {
+        /*
+         * Validate the signatures
+         */
+        if ($stacksBuild >= SECURE_STACK_VERSION) {
         
         
         
-    		$update = new YHStacksUpdate();
+            $update = new YHStacksUpdate();
             $update->stacksPublicKeyFilename = STACKS_PUBLIC_KEY_FILENAME;
             $update->developerPrivateKeyFilename = DEVELOPER_PRIVATE_KEY_FILENAME;
             $update->developerPrivateKeyPassphrase = DEVELOPER_PRIVATE_KEY_PASSPHRASE;
 
 
             /*
-    		 * get the verified stacks update request
+             * get the verified stacks update request
              * this only returns info that has been verified to be from Stacks
              * this will return false when the request is insecure or verification fails
              *
              * here we're rejecting all other types of spoofed requests. since only 
              * requests signed by stacks will pass
              */
-    		$stacksUpdateRequest = $update->stacks_update_request();
-    		if (!$stacksUpdateRequest) throw new Exception("Bad Request");
+            $stacksUpdateRequest = $update->stacks_update_request();
+            if (!$stacksUpdateRequest) throw new Exception("Bad Request");
     
     
-    		/*
+            /*
              * get the verified developer update info
              * this only returns info that was verified signed with your keys
              * this will return false in all other cases
@@ -97,17 +97,17 @@
              * that hs been verified by stacks, and resigned with your public
              * key will pass
              */
-    		$developerUpdateInfo = $update->devloper_update_info ();
-    		if (!$developerUpdateInfo) throw new Exception("Bad Update Info");
+            $developerUpdateInfo = $update->devloper_update_info ();
+            if (!$developerUpdateInfo) throw new Exception("Bad Update Info");
     
     
             /*
              * now that we can trust the data is is valid, we check
              * to make sure it's the data we expect
              */
-    		$stackID = $developerUpdateInfo->id;    
-    		if ($stackID !== DEVELOPER_INFO_STACK_ID) {
-    			 throw new Exception("Bad Stack ID: '" . $stackID ."'");
+            $stackID = $developerUpdateInfo->id;    
+            if ($stackID !== DEVELOPER_INFO_STACK_ID) {
+                 throw new Exception("Bad Stack ID: '" . $stackID ."'");
             }
         
             /*  
@@ -151,7 +151,7 @@
          */
 
         $filename = APPCAST_PATH;
-    	if (!file_exists ($filename)) throw new Exception("File not found.");
+        if (!file_exists ($filename)) throw new Exception("File not found.");
     
         // Set the content type to xml
         header ("Content-Type: text/xml");
@@ -182,13 +182,13 @@
 
         // whenever there is a bad request or any other problem
         // send a 403 error messaage -- and log to our php error log
-    	ob_clean ();
+        ob_clean ();
 
-    	$message = ($e->getMessage ()) ?: "";
-    	header("HTTP/1.0 403 Forbidden" . $message);
-    	error_log("\n" . $message . "\n\n", 0);
+        $message = ($e->getMessage ()) ?: "";
+        header("HTTP/1.0 403 Forbidden" . $message);
+        error_log("\n" . $message . "\n\n", 0);
     
-    	ob_end_flush();
+        ob_end_flush();
     }
 
 
