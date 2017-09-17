@@ -143,13 +143,16 @@ class YHStacksUpdate {
 	 * and the developer private key. The stack public key can be found on the Stacks
 	 * github repository. The developer private key should be created with the generate_keys
 	 * ruby script. Your private key should not be shared with anyone else.
+	 * @param (boolean) Varify the SSL CA from the remote URL (default: true)
+	 * @return (string|false) The public online certificate or false on non-200 status.
 	 */
-	private function stack_public_online_key() {
+	private function stack_public_online_key($verify = true) {
 		$ch = curl_init();
 		curl_setopt ($ch, CURLOPT_URL, self::STACKS_PUBLIC_KEY_URL);
 		curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt ($ch, CURLOPT_HEADER, false);
 		curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 5);
+		curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, boolval($verify));
 		$results = curl_exec($ch);
 		$httpCode = curl_getinfo ($ch, CURLINFO_HTTP_CODE);
 		curl_close ($ch);
@@ -162,7 +165,7 @@ class YHStacksUpdate {
 			$publicKey = file_get_contents($this->stacksPublicKeyFilename);
 		}
 		else {
-			$publicKey = $this->online_key();
+			$publicKey = $this->stack_public_online_key();
 			if ($publicKey) file_put_contents($this->stacksPublicKeyFilename, $publicKey);
 		}
 
