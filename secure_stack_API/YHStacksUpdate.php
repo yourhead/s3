@@ -19,7 +19,7 @@ class YHStacksUpdate {
 
 
   	// the URL where the stacks public key can be downloaded
-	const STACKS_PUBLIC_KEY_URL = "https://yourhead.com/appcast/RW6/Stacks3/stack_public_key.pem";
+	const STACKS_PUBLIC_KEY_URL = "http://yourhead.com/appcast/RW6/Stacks3/stack_public_key.pem";
 
 	// the stack update request
 	private $stacksSignature;
