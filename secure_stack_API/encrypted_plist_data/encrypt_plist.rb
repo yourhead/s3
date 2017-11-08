@@ -34,10 +34,8 @@ if (!data)
 end
 
 
-# download the public key
-stackPublicKeyURL = "https://raw.githubusercontent.com/yourhead/s3/master/secure_update_API/stack_public_key.pem"
-publicKeyPem = Net::HTTP.get(URI.parse(stackPublicKeyURL))
-publicKey = OpenSSL::PKey::RSA.new (File.read ('./public.pem'))
+#
+publicKey = OpenSSL::PKey::RSA.new (File.read (File.realpath(__dir__ + '/../stack_public_key.pem')))
 if (!publicKey)
 	abort("Could not download stacks public key")
 end
